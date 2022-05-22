@@ -36,6 +36,16 @@ const resolvers = {
       );
     },
   },
+
+  Mutation: {
+    createUser: (parent, args) => {
+      const user = args.input;
+      const lastId = UserList[UserList.length - 1].id;
+      user.id = lastId + 1;
+      UserList.push(user);
+      return user;
+    },
+  },
 };
 
 module.exports = { resolvers };
