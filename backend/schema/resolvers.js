@@ -45,6 +45,26 @@ const resolvers = {
       UserList.push(user);
       return user;
     },
+
+    updateUsername: (parent, args) => {
+      const { id, newUsername } = args.input;
+      let updatedUser;
+      UserList.forEach((user) => {
+        if (user.id === Number(id)) {
+          user.username = newUsername;
+          updatedUser = user;
+        }
+      });
+
+      return updatedUser;
+    },
+
+    // we can use _ for parent if not using it
+    deleteUser: (_, args) => {
+      // lodash remove returns an array
+      const deletedUsers = ld.remove(UserList, (user) => user.id === Number(args.id));
+      return deletedUsers[0];
+    },
   },
 };
 
