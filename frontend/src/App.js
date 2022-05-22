@@ -1,10 +1,22 @@
 import './App.css';
+import {
+  ApolloClient,
+  InMemoryCache,
+  ApolloProvider,
+} from '@apollo/client';
+import DisplayData from './DisplayData';
 
 function App() {
+  const client = new ApolloClient({
+    cache: new InMemoryCache(),
+    uri: 'http://localhost:1337/graphql',
+  });
   return (
-    <div className="App">
-      <div>hi</div> 
-    </div>
+    <ApolloProvider client={client}>
+      <div className='App'>
+        <DisplayData />
+      </div>
+    </ApolloProvider>
   );
 }
 
