@@ -6,6 +6,6 @@ const { resolvers } = require('./schema/resolvers');
 // every function that handles those queries exists inside resolvers
 const server = new ApolloServer({ typeDefs, resolvers });
 
-server.listen().then(({ url }) => {
+server.listen({port: 1337}).then(({ url }) => {
   console.log(`Your API is Running at ${url}`);
 });
