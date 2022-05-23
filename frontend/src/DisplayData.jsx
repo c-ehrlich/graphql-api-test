@@ -1,4 +1,4 @@
-import { useQuery, useLazyQuery, gql } from '@apollo/client';
+import { useQuery, useLazyQuery, gql, useMutation } from '@apollo/client';
 import { useState } from 'react';
 
 const QUERY_ALL_USERS = gql`
@@ -37,8 +37,23 @@ const GET_MOVIE_BY_NAME = gql`
   }
 `;
 
+const CREATE_USER_MUTATION = gql`
+  mutation CreateUser($input: CreateUserInput!) {
+    createUser(input: $input) {
+      id
+      name
+    }
+  }
+`;
+
 const DisplayData = () => {
   const [movieSearch, setMovieSearch] = useState('');
+  const [createUserInput, setCreateUserInput] = useState({
+    name: '',
+    username: '',
+    age: 0,
+    nationality: '',
+  });
   const { data, loading, error } = useQuery(QUERY_ALL_USERS);
   const { data: movieData } = useQuery(QUERY_ALL_MOVIES);
   const [
@@ -49,6 +64,8 @@ const DisplayData = () => {
       // loading: movieSearchLoading,
     },
   ] = useLazyQuery(GET_MOVIE_BY_NAME);
+  const [createUser, { data: createUserData, error: createUserError }] =
+    useMutation(CREATE_USER_MUTATION);
 
   if (loading) {
     return <h1>Data is loading...</h1>;
@@ -61,6 +78,70 @@ const DisplayData = () => {
   if (data) {
     return (
       <div>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            marginLeft: '100px',
+            marginRight: '100px',
+          }}
+        >
+          <input
+            type='text'
+            placeholder='name'
+            value={createUserInput.name}
+            onChange={(e) => {
+              console.log(e.currentTarget.value);
+              setCreateUserInput((input) => {
+                return { ...input, name: e.target.value };
+              });
+            }}
+          />
+          <input
+            type='text'
+            placeholder='username'
+            value={createUserInput.username}
+            onChange={(e) => {
+              setCreateUserInput((input) => {
+                return { ...input, username: e.target.value };
+              });
+            }}
+          />
+          <input
+            type='number'
+            placeholder='age'
+            value={createUserInput.age}
+            onChange={(e) => {
+              console.log(e.target);
+              setCreateUserInput((input) => {
+                return { ...input, age: Number(e.target.value) };
+              });
+            }}
+          />
+          <input
+            type='text'
+            placeholder='nationality'
+            value={createUserInput.nationality}
+            onChange={(e) => {
+              setCreateUserInput((input) => {
+                return { ...input, nationality: e.target.value.toUpperCase() };
+              });
+            }}
+          />
+          <button
+            onClick={() =>
+              createUser({
+                variables: {
+                  input: createUserInput,
+                },
+              })
+            }
+          >
+            Create User
+          </button>
+          <div>{createUserData && JSON.stringify(createUserData)}</div>
+          <div>{createUserError && JSON.stringify(createUserError)}</div>
+        </div>
         <h1>Users</h1>
         {data.users.map((user) => (
           <div key={user.id}>
