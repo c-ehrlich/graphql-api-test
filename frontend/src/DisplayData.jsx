@@ -1,4 +1,5 @@
-import { useQuery, gql } from '@apollo/client';
+import { useQuery, useLazyQuery, gql } from '@apollo/client';
+import { useState } from 'react';
 
 const QUERY_ALL_USERS = gql`
   query GetAllUsers {
@@ -20,14 +21,34 @@ const QUERY_ALL_USERS = gql`
 const QUERY_ALL_MOVIES = gql`
   query GetAllMovies {
     movies {
+      id
       name
     }
   }
 `;
 
+const GET_MOVIE_BY_NAME = gql`
+  query Movie($name: String!) {
+    movie(name: $name) {
+      id
+      name
+      yearOfPublication
+    }
+  }
+`;
+
 const DisplayData = () => {
+  const [movieSearch, setMovieSearch] = useState('');
   const { data, loading, error } = useQuery(QUERY_ALL_USERS);
   const { data: movieData } = useQuery(QUERY_ALL_MOVIES);
+  const [
+    fetchMovie,
+    {
+      data: movieSearchData,
+      // error: movieSearchError,
+      // loading: movieSearchLoading,
+    },
+  ] = useLazyQuery(GET_MOVIE_BY_NAME);
 
   if (loading) {
     return <h1>Data is loading...</h1>;
@@ -58,14 +79,50 @@ const DisplayData = () => {
             )}
           </div>
         ))}
-        {movieData.movies && (
+        {movieData ? (
           <>
             <h1>Movies</h1>
             {movieData.movies.map((movie) => (
-              <div>{movie.name}</div>
+              <div key={movie.id}>{movie.name}</div>
             ))}
           </>
+        ) : (
+          <div>movieData loading...</div>
         )}
+        <div>
+          <input
+            type='text'
+            placeholder='Interstellar...'
+            value={movieSearch}
+            onChange={(e) => setMovieSearch(e.currentTarget.value)}
+          />
+          <button
+            onClick={() =>
+              fetchMovie({
+                variables: {
+                  name: movieSearch,
+                },
+              })
+            }
+          >
+            Fetch Data
+          </button>
+          <div>
+            {movieSearchData && (
+              <div>
+                <div>Name: {movieSearchData.movie.name}</div>
+                <div>
+                  Date Published: {movieSearchData.movie.yearOfPublication}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
       </div>
     );
   }
