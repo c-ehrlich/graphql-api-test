@@ -46,6 +46,14 @@ const CREATE_USER_MUTATION = gql`
   }
 `;
 
+const DELETE_USER_MUTATION = gql`
+  mutation DeleteUser($id: ID!) {
+    deleteUser(id: $id) {
+      username
+    }
+  }
+`;
+
 const DisplayData = () => {
   const [movieSearch, setMovieSearch] = useState('');
   const [createUserInput, setCreateUserInput] = useState({
@@ -54,7 +62,12 @@ const DisplayData = () => {
     age: 0,
     nationality: '',
   });
-  const { data, loading, error } = useQuery(QUERY_ALL_USERS);
+  const {
+    data,
+    loading,
+    error,
+    refetch: refetchQueryAllUsers,
+  } = useQuery(QUERY_ALL_USERS);
   const { data: movieData } = useQuery(QUERY_ALL_MOVIES);
   const [
     fetchMovie,
@@ -66,6 +79,8 @@ const DisplayData = () => {
   ] = useLazyQuery(GET_MOVIE_BY_NAME);
   const [createUser, { data: createUserData, error: createUserError }] =
     useMutation(CREATE_USER_MUTATION);
+  const [deleteUser, { data: deleteUserData, error: deleteUserError }] =
+    useMutation(DELETE_USER_MUTATION);
 
   if (loading) {
     return <h1>Data is loading...</h1>;
@@ -134,7 +149,7 @@ const DisplayData = () => {
                 variables: {
                   input: createUserInput,
                 },
-              })
+              }).then(refetchQueryAllUsers)
             }
           >
             Create User
@@ -158,6 +173,17 @@ const DisplayData = () => {
                 )}
               </div>
             )}
+            <button
+              onClick={() =>
+                deleteUser({
+                  variables: {
+                    id: user.id,
+                  },
+                }).then(refetchQueryAllUsers)
+              }
+            >
+              Delete
+            </button>
           </div>
         ))}
         {movieData ? (
